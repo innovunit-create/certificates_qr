@@ -5,15 +5,9 @@ import os
 from PIL import Image
 
 # Config
-BASE_PUBLIC_URL = (
-    "https://innovunit-create.github.io/"
-    "certificates_qr/certificates/"
-)
-PUBLIC_FOLDER = "certificates_public"
-FINAL_FOLDER = "certificates_final"
-
-os.makedirs(PUBLIC_FOLDER, exist_ok=True)
-os.makedirs(FINAL_FOLDER, exist_ok=True)
+# This folder should exist inside your GitHub repo (e.g., certificates_qr/certificates)
+GITHUB_CERT_FOLDER = "certificates_qr/certificates"
+os.makedirs(GITHUB_CERT_FOLDER, exist_ok=True)
 
 st.set_page_config(page_title="Certificate QR Generator", layout="centered")
 
@@ -34,15 +28,13 @@ if uploaded_file:
     cert_id = str(uuid.uuid4())
     filename = f"{cert_id}.png"
 
-    # Save public softcopy
-    public_path = os.path.join(PUBLIC_FOLDER, filename)
-    cert.save(public_path)
+    # Generate URL (matches GitHub Pages path)
+    BASE_PUBLIC_URL = "https://innovunit-create.github.io/certificates_qr/certificates/"
+    cert_url = BASE_PUBLIC_URL + filename
 
     # Generate QR
-    cert_url = BASE_PUBLIC_URL + filename
     qr = qrcode.make(cert_url).convert("RGBA")
-
-    qr_size = int(w * 0.15)
+    qr_size = int(w * 0.10)
     qr = qr.resize((qr_size, qr_size))
 
     margin = 30
@@ -50,8 +42,8 @@ if uploaded_file:
 
     cert.paste(qr, position, qr)
 
-    # Save final certificate
-    final_path = os.path.join(FINAL_FOLDER, filename)
+    # Save final certificate directly to GitHub-tracked folder
+    final_path = os.path.join(GITHUB_CERT_FOLDER, filename)
     cert.save(final_path)
 
     st.success("Certificate processed successfully!")
