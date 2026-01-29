@@ -2,15 +2,14 @@ import streamlit as st
 import uuid
 import qrcode
 from PIL import Image
-from github import Github
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
 import os
-import base64
 
-# --- CONFIG ---
-GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]  # Store your token in .streamlit/secrets.toml
-GITHUB_REPO = "innovunit-create/certificates_qr"  # your repo name
-GITHUB_PATH = "certificates_qr/certificates"  # folder in repo
-BASE_PUBLIC_URL = f"https://innovunit-create.github.io/{GITHUB_PATH}/"
+# Google Drive Auth
+gauth = GoogleAuth()
+gauth.LocalWebserverAuth()  # Opens a browser to authenticate
+drive = GoogleDrive(gauth)
 
 st.set_page_config(page_title="Certificate QR Generator", layout="centered")
 
@@ -30,49 +29,48 @@ if uploaded_file:
     # Unique ID
     cert_id = str(uuid.uuid4())
     filename = f"{cert_id}.png"
-    cert_url = BASE_PUBLIC_URL + filename
 
-    # Generate QR code
+    # Save locally first (optional)
+    cert.save(filename)
+
+    # Upload to Google Drive
+    gfile = drive.CreateFile({'title': filename})
+    gfile.SetContentFile(filename)
+    gfile.Upload()
+
+    # Make file public
+    gfile.InsertPermission({
+        'type': 'anyone',
+        'value': 'anyone',
+        'role': 'reader'
+    })
+
+    # Get public URL
+    cert_url = f"https://drive.google.com/uc?id={gfile['id']}"
+
+    # Generate QR
     qr = qrcode.make(cert_url).convert("RGBA")
-    qr_size = int(w * 0.10)
+    qr_size = int(w * 0.15)
     qr = qr.resize((qr_size, qr_size))
 
     margin = 30
     position = (w - qr_size - margin, h - qr_size - margin)
     cert.paste(qr, position, qr)
 
-    # Save temporarily locally
-    local_path = f"temp_{filename}"
-    cert.save(local_path)
+    # Save final certificate locally
+    final_path = f"certificate_with_qr_{cert_id}.png"
+    cert.save(final_path)
 
-    # Upload to GitHub
-    g = Github(GITHUB_TOKEN)
-    repo = g.get_repo(GITHUB_REPO)
-
-    # Read the file and encode as base64
-    with open(local_path, "rb") as f:
-        content = f.read()
-    encoded_content = base64.b64encode(content).decode()
-
-    try:
-        # Check if file exists
-        repo_file = repo.get_contents(f"{GITHUB_PATH}/{filename}")
-        repo.update_file(f"{GITHUB_PATH}/{filename}", f"Update certificate {filename}", content, repo_file.sha)
-    except:
-        # File doesn't exist, create it
-        repo.create_file(f"{GITHUB_PATH}/{filename}", f"Add certificate {filename}", content)
-
-    st.success("✅ Certificate uploaded to GitHub successfully!")
+    st.success("Certificate processed successfully!")
 
     st.image(cert, caption="Final Certificate with QR", use_column_width=True)
 
-    st.markdown(f"🔗 **QR Code URL:** {cert_url}")
-    st.download_button(
-        label="⬇️ Download Certificate",
-        data=open(local_path, "rb"),
-        file_name="certificate_with_qr.png",
-        mime="image/png"
-    )
+    with open(final_path, "rb") as f:
+        st.download_button(
+            label="⬇️ Download Certificate",
+            data=f,
+            file_name="certificate_with_qr.png",
+            mime="image/png"
+        )
 
-    # Clean up local temp file
-    os.remove(local_path)
+    st.markdown(f"🔗 **QR Code URL:** {cert_url}")
