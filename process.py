@@ -2,7 +2,7 @@ import streamlit as st
 import uuid
 import qrcode
 from PIL import Image
-# from github import Github
+from github import Github
 import os
 import base64
 
