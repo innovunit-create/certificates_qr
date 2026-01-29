@@ -34,7 +34,7 @@ if uploaded_file:
 
     # Generate QR code
     qr = qrcode.make(cert_url).convert("RGBA")
-    qr_size = int(w * 0.15)
+    qr_size = int(w * 0.10)
     qr = qr.resize((qr_size, qr_size))
 
     margin = 30
