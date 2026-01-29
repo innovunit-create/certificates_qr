@@ -8,7 +8,7 @@ import base64
 
 # --- CONFIG ---
 GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]  # Store your token in .streamlit/secrets.toml
-GITHUB_REPO = "innovunit-create/certificates_qr.git"  # your repo name
+GITHUB_REPO = "https://github.com/innovunit-create/certificates_qr.git"  # your repo name
 GITHUB_PATH = "certificates_qr/certificates"  # folder in repo
 BASE_PUBLIC_URL = f"https://innovunit-create.github.io/{GITHUB_PATH}/"
 
