@@ -5,7 +5,10 @@ import os
 from PIL import Image
 
 # Config
-BASE_PUBLIC_URL = "https://your-public-app-url.streamlit.app/certificates/"
+BASE_PUBLIC_URL = (
+    "https://innovunit-create.github.io/"
+    "certificates_qr/certificates/"
+)
 PUBLIC_FOLDER = "certificates_public"
 FINAL_FOLDER = "certificates_final"
 
