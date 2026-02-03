@@ -10,7 +10,7 @@ import base64
 GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]  # Store your token in .streamlit/secrets.toml
 GITHUB_REPO = "innovunit-create/certificates_qr"  # your repo name
 GITHUB_PATH = "certificates_qr/certificates"  # folder in repo
-BASE_PUBLIC_URL = "https://innovunit-create.github.io/certificates_qr/certificates_qr/certificates/"
+BASE_PUBLIC_URL = "https://innovunit-create/certificates_qr/certificates_qr/certificates/"
 
 st.set_page_config(page_title="Certificate QR Generator", layout="centered")
 
